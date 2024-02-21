@@ -1,236 +1,121 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
 interface DiscountRate {
- double getDiscountRate();
+    double getServiceMemberDiscount();
+    double getProductMemberDiscount();
 }
+class Customer implements DiscountRate {
+    private String customerName;
+    private String customerType;
 
-abstract class Customer implements DiscountRate {
- private String customerType;
- private List<Product> shoppingCart;
+    public Customer(String customerName, String customerType) {
+        this.customerName = customerName;
+        this.customerType = customerType;
+    }
 
- Customer(String type) {
- this.customerType = type;
- this.shoppingCart = new ArrayList<>();
- }
+    public String getCustomerName() {
+        return customerName;
+    }
 
- void addProduct(Product product) {
- shoppingCart.add(product);
- }
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
 
- public abstract void buyProduct(Sale sale, Product product);
+    public String getCustomerType() {
+        return customerType;
+    }
 
- public abstract void buyService(Sale sale, Service service);
+    public void setCustomerType(String customerType) {
+        this.customerType = customerType;
+    }
 
- @Override
- public abstract double getDiscountRate();
-}
+    @Override
+    public double getServiceMemberDiscount() {
+        switch (customerType) {
+            case "Premium":
+                return 0.2;
+            case "Gold":
+                return 0.15;
+            case "Silver":
+                return 0.1;
+            default:
+                return 0.0;
+        }
+    }
 
-class Premium extends Customer {
- private double promotionDiscount;
-
- Premium(double promotionDiscount) {
- super("Premium");
- this.promotionDiscount = promotionDiscount;
- }
-
- @Override
- public void buyProduct(Sale sale, Product product) {
- product.setPrice(getDiscountedPrice(product.getPrice()));
- sale.sellProduct(product);
- }
-
- @Override
- public void buyService(Sale sale, Service service) {
- service.setPrice(getDiscountedPrice(service.getPrice()));
- sale.sellService(service);
- }
-
- @Override
- public double getDiscountRate() {
- if (this.customerType.equals("Premium"))
- return this.promotionDiscount;
- return0.0;
- }
-
- private double getDiscountedPrice(double price) {
- return price * getDiscountRate();
- }
-}
-
-class Gold extends Customer {
- Gold() {
- super("Gold");
- }
-
- @Override
- public void buyProduct(Sale sale, Product product) {
- product.setPrice(getDiscountedPrice(product.getPrice()));
- sale.sellProduct(product);
- }
-
- @Override
- public void buyService(Sale sale, Service service) {
- service.setPrice(getDiscountedPrice(service.getPrice()));
- sale.sellService(service);
- }
-
- @Override
- public double getDiscountRate() {
- if (this.customerType.equals("Gold"))
- return0.1;
- return0.0;
- }
-
- private double getDiscountedPrice(double price) {
- return price * getDiscountRate();
- }
-}
-
-class Silver extends Customer {
- Silver() {
- super("Silver");
- }
-
- @Override
- public void buyProduct(Sale sale, Product product) {
- product.setPrice(getDiscountedPrice(product.getPrice()));
- sale.sellProduct(product);
- }
-
- @Override
- public void buyService(Sale sale, Service service) {
- service.setPrice(getDiscountedPrice(service.getPrice()));
- sale.sellService(service);
- }
-
- @Override
- public double getDiscountRate() {
- if (this.customerType.equals("Silver"))
- return0.1;
- return0.0;
- }
-
- private double getDiscountedPrice(double price) {
- return price * getDiscountRate();
- }
-}
-
-class Normal extends Customer {
- Normal() {
- super("Normal");
- }
-
- @Override
- public void buyProduct(Sale sale, Product product) {
-sale.sellProduct(product);
- }
-
- @Override
- public void buyService(Sale sale, Service service) {
- sale.sellService(service);
- }
-
- @Override
- public double getDiscountRate() {
- return0.0;
- }
+    @Override
+    public double getProductMemberDiscount() {
+        switch (customerType) {
+            case "Premium":
+            case "Gold":
+            case "Silver":
+                return 0.1;
+            default:
+                return 0.0;
+        }
+    }
 }
 
 class Sale {
- private List<Product> products;
- private List<Service> services;
- private List<Package> packages;
- private HashMap<String, Customer> customers;
+    private Customer customer;
+    private String date;
+    private double serviceExpense;
+    private double productExpense;
 
- Sale() {
- this.products = new ArrayList<>();
- this.services = new ArrayList<>();
- this.packages = new ArrayList<>();
- this.customers = new HashMap<>();
- }
+    public Sale(Customer customer, String date) {
+        this.customer = customer;
+        this.date = date;
+    }
 
- void sellProduct(Product product) {
- this.products.add(product);
- // implement balance management code logic here
- }
+    public String getDate() {
+        return date;
+    }
 
- void sellService(Service service) {
- this.services.add(service);
- // implement balance management code logic here
- }
+    public double getServiceExpense() {
+        return serviceExpense;
+    }
 
- void sellPackage(Package package) {
- this.packages.add(package);
- // implement balance management code logic here
- }
+    public void setServiceExpense(double serviceExpense) {
+        this.serviceExpense = serviceExpense;
+    }
+
+    public double getProductExpense() {
+        return productExpense;
+    }
+
+    public void setProductExpense(double productExpense) {
+        this.productExpense = productExpense;
+    }
+
+    public double getTotalExpense() {
+        double total = serviceExpense * (1 - customer.getServiceMemberDiscount());
+        total += productExpense * (1 - customer.getProductMemberDiscount());
+        return total;
+    }
+
+    public void displayInfo() {
+        System.out.println("Customer: " + customer.getCustomerName());
+        System.out.println("Date: " + date);
+        System.out.println("Service Expense: " + serviceExpense);
+        System.out.println("Product Expense: " + productExpense);
+        System.out.println("Total Expense: " + getTotalExpense());
+    }
 }
 
-class Product {
- private String name;
- private double price;
+public class Main {
+    public static void main(String[] args) {
+        // Example usage
+        Customer customer1 = new Customer("John", "Premium");
+        Sale sale1 = new Sale(customer1, "2024-02-21");
+        sale1.setServiceExpense(100);
+        sale1.setProductExpense(50);
+        sale1.displayInfo();
 
- Product(String name, double price) {
- this.name = name;
- this.price = price;
- }
+        System.out.println();
 
- public String getName() {
- return name;
- }
-
- public double getPrice() {
- return price;
- }
-
- public void setPrice(double price) {
- this.price = price;
- }
+        Customer customer2 = new Customer("Jane", "Silver");
+        Sale sale2 = new Sale(customer2, "2024-02-22");
+        sale2.setServiceExpense(150);
+        sale2.setProductExpense(75);
+        sale2.displayInfo();
+    }
 }
-
-class Service {
- private String name;
- private double price;
-
- Service(String name, double price) {
- this.name = name;
- this.price = price;
- }
-
- public String getName() {
- return name;
- }
-
- public double getPrice() {
- return price;
- }
-
- public void setPrice(double price) {
- this.price = price;
- }
-}
-
-class Package {
- private String name;
- private double price;
- private List<Product> products;
- private List<Service> services;
- private Double discountRate;
-
-Package(String name, double price, List<Product> products, List<Service> services) {
- this.name = name;
- this.price = price;
- this.products = products;
- this.services = services;
- this.discountRate =0.0;
- }
-
- public Double getPrice() {
- return price - price * discountRate;
- }
-
- public void setPrice(double price) {
- this.price = price;
- }
-}
+  
