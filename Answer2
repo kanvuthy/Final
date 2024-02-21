@@ -1,0 +1,236 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+interface DiscountRate {
+ double getDiscountRate();
+}
+
+abstract class Customer implements DiscountRate {
+ private String customerType;
+ private List<Product> shoppingCart;
+
+ Customer(String type) {
+ this.customerType = type;
+ this.shoppingCart = new ArrayList<>();
+ }
+
+ void addProduct(Product product) {
+ shoppingCart.add(product);
+ }
+
+ public abstract void buyProduct(Sale sale, Product product);
+
+ public abstract void buyService(Sale sale, Service service);
+
+ @Override
+ public abstract double getDiscountRate();
+}
+
+class Premium extends Customer {
+ private double promotionDiscount;
+
+ Premium(double promotionDiscount) {
+ super("Premium");
+ this.promotionDiscount = promotionDiscount;
+ }
+
+ @Override
+ public void buyProduct(Sale sale, Product product) {
+ product.setPrice(getDiscountedPrice(product.getPrice()));
+ sale.sellProduct(product);
+ }
+
+ @Override
+ public void buyService(Sale sale, Service service) {
+ service.setPrice(getDiscountedPrice(service.getPrice()));
+ sale.sellService(service);
+ }
+
+ @Override
+ public double getDiscountRate() {
+ if (this.customerType.equals("Premium"))
+ return this.promotionDiscount;
+ return0.0;
+ }
+
+ private double getDiscountedPrice(double price) {
+ return price * getDiscountRate();
+ }
+}
+
+class Gold extends Customer {
+ Gold() {
+ super("Gold");
+ }
+
+ @Override
+ public void buyProduct(Sale sale, Product product) {
+ product.setPrice(getDiscountedPrice(product.getPrice()));
+ sale.sellProduct(product);
+ }
+
+ @Override
+ public void buyService(Sale sale, Service service) {
+ service.setPrice(getDiscountedPrice(service.getPrice()));
+ sale.sellService(service);
+ }
+
+ @Override
+ public double getDiscountRate() {
+ if (this.customerType.equals("Gold"))
+ return0.1;
+ return0.0;
+ }
+
+ private double getDiscountedPrice(double price) {
+ return price * getDiscountRate();
+ }
+}
+
+class Silver extends Customer {
+ Silver() {
+ super("Silver");
+ }
+
+ @Override
+ public void buyProduct(Sale sale, Product product) {
+ product.setPrice(getDiscountedPrice(product.getPrice()));
+ sale.sellProduct(product);
+ }
+
+ @Override
+ public void buyService(Sale sale, Service service) {
+ service.setPrice(getDiscountedPrice(service.getPrice()));
+ sale.sellService(service);
+ }
+
+ @Override
+ public double getDiscountRate() {
+ if (this.customerType.equals("Silver"))
+ return0.1;
+ return0.0;
+ }
+
+ private double getDiscountedPrice(double price) {
+ return price * getDiscountRate();
+ }
+}
+
+class Normal extends Customer {
+ Normal() {
+ super("Normal");
+ }
+
+ @Override
+ public void buyProduct(Sale sale, Product product) {
+sale.sellProduct(product);
+ }
+
+ @Override
+ public void buyService(Sale sale, Service service) {
+ sale.sellService(service);
+ }
+
+ @Override
+ public double getDiscountRate() {
+ return0.0;
+ }
+}
+
+class Sale {
+ private List<Product> products;
+ private List<Service> services;
+ private List<Package> packages;
+ private HashMap<String, Customer> customers;
+
+ Sale() {
+ this.products = new ArrayList<>();
+ this.services = new ArrayList<>();
+ this.packages = new ArrayList<>();
+ this.customers = new HashMap<>();
+ }
+
+ void sellProduct(Product product) {
+ this.products.add(product);
+ // implement balance management code logic here
+ }
+
+ void sellService(Service service) {
+ this.services.add(service);
+ // implement balance management code logic here
+ }
+
+ void sellPackage(Package package) {
+ this.packages.add(package);
+ // implement balance management code logic here
+ }
+}
+
+class Product {
+ private String name;
+ private double price;
+
+ Product(String name, double price) {
+ this.name = name;
+ this.price = price;
+ }
+
+ public String getName() {
+ return name;
+ }
+
+ public double getPrice() {
+ return price;
+ }
+
+ public void setPrice(double price) {
+ this.price = price;
+ }
+}
+
+class Service {
+ private String name;
+ private double price;
+
+ Service(String name, double price) {
+ this.name = name;
+ this.price = price;
+ }
+
+ public String getName() {
+ return name;
+ }
+
+ public double getPrice() {
+ return price;
+ }
+
+ public void setPrice(double price) {
+ this.price = price;
+ }
+}
+
+class Package {
+ private String name;
+ private double price;
+ private List<Product> products;
+ private List<Service> services;
+ private Double discountRate;
+
+Package(String name, double price, List<Product> products, List<Service> services) {
+ this.name = name;
+ this.price = price;
+ this.products = products;
+ this.services = services;
+ this.discountRate =0.0;
+ }
+
+ public Double getPrice() {
+ return price - price * discountRate;
+ }
+
+ public void setPrice(double price) {
+ this.price = price;
+ }
+}
